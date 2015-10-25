@@ -136,15 +136,5 @@ int main(int argc, char *argv[])
     }
     printf ("%d \n", cislo);
     printf ("%s", pomoc);*/
-    /*
-    bool over = je_prvocislo(cislo);
-    if (over)
-    {
-        printf ("%d jde o prvocislo", cislo);
-    }
-    else
-    {
-        printf("%d neni to prvocislo", cislo);
-    }*/
     return 0;
 }
