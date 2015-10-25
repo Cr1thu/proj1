@@ -1,0 +1,150 @@
+/**
+Ondrej Rouzek (xrouze00)
+Prvni projekt FIT VUT BIB 35, Zak
+Prace s textem
+**/
+
+#include <stdlib.h>
+#include <limits.h>
+#include <stdio.h>
+#include <errno.h>
+#include <stdbool.h>
+
+int delka_retezce (char *slovo)
+{
+    int i=0;
+    while(slovo[i] != '\0')
+    {
+        i++;
+    }
+    return i;
+}
+
+bool je_palindrom (char *slovo)
+{
+    int delka = delka_retezce(slovo) - 1, i=0;
+    if (delka == 0)
+    {
+        return false;
+    }
+    while (delka>=i)
+    {
+        if (slovo[delka]!=slovo[i])
+        {
+            return false;
+        }
+        else
+        {
+            i++;
+            delka--;
+        }
+    }
+    return true;
+}
+
+bool je_prvocislo (int cislo)
+{
+    int i=2;
+    if ((cislo == 1) || (cislo == 0))
+    {
+        return false;
+    }
+    if (cislo == 2)
+    {
+        return true;
+    }
+    while ((cislo/2)>=i)
+    {
+        if (cislo%i == 0)
+        {
+            return false;
+        }
+        else
+        {
+            i++;
+        }
+    }
+    return true;
+}
+
+bool je_cislo (int *cislo, char *buffer)
+{
+    errno = 0;
+    char *pomoc;
+    *cislo = strtol(buffer, &pomoc, 10);
+    if ((errno == ERANGE && (*cislo == LONG_MAX || *cislo == LONG_MIN))
+            || (errno != 0 && *cislo == 0))
+    {
+        return false;
+    }
+    if (delka_retezce(pomoc)!=0)
+    {
+        return false;
+    }
+    return true;
+}
+
+int main(int argc, char *argv[])
+{
+    //int pocet=0;
+    char buffer[101];
+    int cislo;
+
+
+    if (argc > 1)
+    {
+        printf ("Napoveda \n");
+        return 0;
+    }
+
+    while ((scanf("%100s", buffer)) != EOF)
+    {
+        if (je_cislo(&cislo, buffer))
+        {
+            printf("Number: %d", cislo);
+            if (je_prvocislo(cislo))
+            {
+                printf(" (prime)");
+            }
+            if (je_palindrom(buffer))
+            {
+                printf(" (palindrom)");
+            }
+            printf("\n");
+        }
+        else
+        {
+            printf("Word: %s", buffer);
+            if (je_palindrom(buffer))
+            {
+                printf(" (palindrom)");
+            }
+            printf("\n");
+        }
+    }
+    /*cislo = strtol(argv[1], &pomoc, 10);
+    if ((errno == ERANGE && (cislo == LONG_MAX || cislo == LONG_MIN))
+            || (errno != 0 && cislo == 0))
+    {
+        perror("strtol");
+        exit(EXIT_FAILURE);
+    }
+    if (delka_retezce(pomoc)!=0)
+    {
+        fprintf(stderr, "No digits were found\n");
+        exit(EXIT_FAILURE);
+    }
+    printf ("%d \n", cislo);
+    printf ("%s", pomoc);*/
+    /*
+    bool over = je_prvocislo(cislo);
+    if (over)
+    {
+        printf ("%d jde o prvocislo", cislo);
+    }
+    else
+    {
+        printf("%d neni to prvocislo", cislo);
+    }*/
+    return 0;
+}
