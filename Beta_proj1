@@ -1,0 +1,223 @@
+/**
+Ondrej Rouzek (xrouze00)
+Prvni projekt FIT VUT BIB 35, Zak
+Prace s textem
+**/
+
+#include <stdlib.h>
+#include <limits.h>
+#include <stdio.h>
+#include <errno.h>
+#include <stdbool.h>
+#include <time.h>
+
+
+//Funkce delka_retezce, vstupem je retezec a vraci pocet znaku retezce bez znaku '\0'
+int delka_retezce (char *slovo)
+{
+    int i=0;
+    while(slovo[i] != '\0')
+    {
+        i++;
+    }
+    return i;
+}
+
+//Funkce je_palindrom, vstupem je retezec, ktery chceme overit a vysttup je true/false
+bool je_palindrom (char *slovo)
+{
+    int delka = delka_retezce(slovo) - 1, i=0;
+    while (delka>=i)
+    {
+        if (slovo[delka]!=slovo[i])
+        {
+            return false;
+        }
+        else
+        {
+            i++;
+            delka--;
+        }
+    }
+    return true;
+}
+
+
+//Funkce je_prvocislo, vstupem je cislo, vystupem true/false, jednoducha funkce pro overeni prvocisel (jde do poloviny cisla i++)
+bool je_prvocislo (int cislo)
+{
+    int i=2;
+    if ((cislo == 1) || (cislo == 0))
+    {
+        return false;
+    }
+    if (cislo == 2)
+    {
+        return true;
+    }
+    while ((cislo/2)>=i)
+    {
+        if (cislo%i == 0)
+        {
+            return false;
+        }
+        else
+        {
+            i++;
+        }
+    }
+    return true;
+}
+
+
+//Funkce je_cislo, vstupem je retezec a adresa promene kam se ma ulozit prevedene cislo(pokud to jde), vystupem true/false
+bool je_cislo (int *cislo, char *buffer)
+{
+    errno = 0;
+    char *pomoc;
+    if (buffer[0] == '+' || buffer[0] == '-')
+    {
+        return false;
+    }
+    *cislo = strtol(buffer, &pomoc, 10);
+    if ((errno == ERANGE && (*cislo == INT_MAX)) || (errno != 0 && *cislo == 0))
+    {
+        errno = 1;
+        return false;
+    }
+    if (delka_retezce(pomoc)!=0)
+    {
+        return false;
+    }
+    return true;
+}
+
+
+//Funkce je_datum, vstupem je retezec a adresa na kterou zapiseme retezec ve spravnem formatu: DDD DDDD-DD-DD(pokud to jde), vystupem je true/false
+bool je_datum (char *buffer, char datumbuf[15])
+{
+    struct tm datum;
+    char str_rok[5], str_mesic[3], str_den[3];
+    int rok, mesic, den;
+
+    if (delka_retezce(buffer)!=10)
+    {
+        return false;
+    }
+
+    if ((buffer[4] != '-') && (buffer[7] != '-'))
+    {
+        return false;
+    }
+    else
+    {
+        str_rok[0] = buffer[0];
+        str_rok[1] = buffer[1];
+        str_rok[2] = buffer[2];
+        str_rok[3] = buffer[3];
+        str_rok[4] = '\0';
+        str_mesic[0] = buffer[5];
+        str_mesic[1] = buffer[6];
+        str_mesic[2] = '\0';
+        str_den[0] = buffer[8];
+        str_den[1] = buffer[9];
+        str_den[2] = '\0';
+    }
+
+    if ((je_cislo(&rok, str_rok)) && (je_cislo(&mesic, str_mesic)) && (je_cislo(&den, str_den)))
+    {
+        datum.tm_year = rok - 1900;
+        datum.tm_mon = mesic - 1;
+        datum.tm_mday = den;
+        datum.tm_hour = 0;
+        datum.tm_min = 0;
+        datum.tm_sec = 1;
+        datum.tm_isdst = -1;
+    }
+    else
+    {
+        return false;
+    }
+
+    if (((datum.tm_year+1900)<1900) || ((datum.tm_year+1900)>9999) || (datum.tm_mon<0) || (datum.tm_mon>11) || (datum.tm_mday<1) || (datum.tm_mday>31))
+    {
+        //printf("wtf");
+        return false;
+    }
+
+    if ((mktime(&datum)) == -1)
+    {
+        return false;
+    }
+    else
+    {
+        strftime(datumbuf, 15, "%a %Y-%m-%d", &datum);
+        return true;
+    }
+}
+
+
+//Funkce je_slovo, vstupem je retezec, vystupem true/false, porovnava jestli jsou znaky v rozsahu 32 - 127
+bool je_slovo(char *buffer)
+{
+    int i=0;
+    while (buffer[i] != '\0')
+    {
+        if (buffer[i]<' ' || buffer[i]>='~')
+        {
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
+
+int main(int argc, char *argv[])
+{
+    char datumbuf[15];
+    char buffer[101];
+    int cislo;
+
+
+    if (argc > 1)
+    {
+        printf ("Napoveda \n");
+        return 0;
+    }
+
+    while ((scanf("%100s", buffer)) != EOF)
+    {
+        if (je_cislo(&cislo, buffer))
+        {
+            printf("Number: %d", cislo);
+            if (je_prvocislo(cislo))
+            {
+                printf(" (prime)");
+            }
+            printf("\n");
+        }
+        else if (je_datum(buffer,datumbuf))
+        {
+            printf("Date: %s \n", datumbuf);
+        }
+        else if (je_slovo(buffer))
+        {
+            printf("Word: %s", buffer);
+            if (errno == 1)
+            {
+                printf (" (INT_MAX)");
+            }
+            if (je_palindrom(buffer))
+            {
+                printf(" (palindrom)");
+            }
+            printf("\n");
+        }
+        else
+        {
+            printf ("Neocekavany vstup \n");
+        }
+    }
+
+    return 0;
+}
